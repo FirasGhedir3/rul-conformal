@@ -44,3 +44,15 @@ def test_rolling_uses_only_past():
 def test_nasa_score_late_is_worse():
     from src.models.metrics import nasa_score
     assert nasa_score([50], [60]) > nasa_score([50], [40])
+
+
+def test_windows_shape_and_no_future():
+    from src.data.windows import make_windows
+    df = pd.DataFrame({"unit": [1] * 5 + [2] * 3, "cycle": [1, 2, 3, 4, 5, 1, 2, 3],
+                       "s2": [1, 2, 3, 4, 5, 10, 20, 30.0], "RUL": [4, 3, 2, 1, 0, 2, 1, 0.0]})
+    X, y, meta = make_windows(df, ["s2"], window=3)
+    assert X.shape == (8, 3, 1) and len(y) == 8
+    assert X[2, :, 0].tolist() == [1, 2, 3]       # cycles 1-3 du moteur 1
+    assert X[0, :, 0].tolist() == [1, 1, 1]       # padding en début de vie
+    assert X[5, :, 0].tolist() == [10, 10, 10]    # pas de mélange entre moteurs
+    assert X[4, -1, 0] == 5                        # le dernier pas = cycle courant
