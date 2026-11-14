@@ -56,3 +56,34 @@ def test_windows_shape_and_no_future():
     assert X[0, :, 0].tolist() == [1, 1, 1]       # padding en début de vie
     assert X[5, :, 0].tolist() == [10, 10, 10]    # pas de mélange entre moteurs
     assert X[4, -1, 0] == 5                        # le dernier pas = cycle courant
+
+
+def test_conformal_quantile_finite_sample():
+    from src.conformal.conformal import conformal_quantile
+    s = np.arange(1, 10)                      # n = 9 scores : 1..9
+    assert conformal_quantile(s, 0.1) == 9    # k = ceil(10 * 0.9) = 9
+    assert conformal_quantile(s, 0.2) == 8    # k = ceil(10 * 0.8) = 8
+    assert np.isinf(conformal_quantile(s, 0.05))  # k = 10 > n : impossible de garantir 95 %
+
+
+def test_split_conformal_coverage():
+    from src.conformal.conformal import SplitConformal, coverage
+    rng = np.random.default_rng(0)
+    y_cal, y_new = rng.normal(size=2000), rng.normal(size=20000)
+    sc = SplitConformal(alpha=0.1).fit(np.zeros(2000), y_cal)
+    lo, hi = sc.predict(np.zeros(20000))
+    lo = np.zeros(20000) - sc.q_               # pas de clip à 0 pour ce test
+    assert abs(coverage(y_new, lo, hi) - 0.9) < 0.02
+
+
+def test_cvplus_coverage():
+    from src.conformal.cross import CVPlus
+    from src.conformal.conformal import coverage
+    rng = np.random.default_rng(0)
+    n, K, m = 1000, 5, 5000
+    fold_idx = np.arange(n) % K
+    y_cal = rng.normal(size=n)
+    cv = CVPlus(alpha=0.1).fit(np.zeros(n), y_cal, fold_idx)
+    lo, hi = cv.predict(np.zeros((m, K), dtype=np.float32))
+    lo = -hi                                      # pas de clip à 0 pour ce test
+    assert abs(coverage(rng.normal(size=m), lo, hi) - 0.9) < 0.03
