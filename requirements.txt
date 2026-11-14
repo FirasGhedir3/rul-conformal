@@ -1,0 +1,14 @@
+numpy
+pandas
+matplotlib
+seaborn
+plotly
+scikit-learn
+lightgbm
+mapie>=1.0
+torch
+shap
+streamlit
+jupyter
+ipykernel
+pytest

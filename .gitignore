@@ -1,0 +1,21 @@
+# Données (trop lourdes pour Git, on garde juste la structure)
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Modèles entraînés
+*.pt
+*.pkl
+*.joblib
+
+# Divers
+.DS_Store
+.vscode/
