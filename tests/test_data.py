@@ -31,3 +31,16 @@ def test_rul_test():
     rul = pd.Series([10, 3], index=[1, 2])
     out = add_rul_test(df, rul, clip=None)
     assert out.loc[out.unit == 1, "RUL"].tolist() == [14, 13, 12, 11, 10]
+
+
+def test_rolling_uses_only_past():
+    from src.features.rolling import add_rolling_features
+    df = pd.DataFrame({"unit": [1] * 6, "cycle": range(1, 7), "s2": [0, 0, 0, 0, 0, 100.0]})
+    out = add_rolling_features(df, ["s2"], windows=(3,))
+    # la valeur 100 au cycle 6 ne doit pas influencer les cycles précédents
+    assert out["s2_mean3"].iloc[:5].abs().max() == 0
+
+
+def test_nasa_score_late_is_worse():
+    from src.models.metrics import nasa_score
+    assert nasa_score([50], [60]) > nasa_score([50], [40])
