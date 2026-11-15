@@ -1,0 +1,27 @@
+# Données brutes : non versionnées (à télécharger depuis la NASA)
+data/raw/*
+!data/raw/.gitkeep
+
+# Données préparées : seuls les fichiers utilisés par le tableau de bord sont versionnés
+data/processed/*
+!data/processed/.gitkeep
+!data/processed/FD001_test.csv
+!data/processed/FD001_val.csv
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Modèles entraînés : seul le modèle utilisé par le tableau de bord est versionné
+models/*
+*.pt
+*.pkl
+*.joblib
+!models/conformal_cv_fd001.joblib
+
+# Divers
+.DS_Store
+.vscode/
